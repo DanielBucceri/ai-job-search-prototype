@@ -7,10 +7,9 @@ import axios from 'axios';
 
 dotenv.config();
 
-console.log('PORT:', process.env.PORT);
 
 // Dont start the server if the OPENAI_API_KEY  not set
-if (!process.env.OPENAI_API_KEY) {
+if (!process.env.OPENAI_API_KEY || !process.env.OPENAI_API_KEY.startsWith('sk-')) {
     throw new Error('OpenAI API key not set corectly!');
 }
 
@@ -36,14 +35,56 @@ app.get('/', (req, res) => {
 
 // Route to get jobs from Remotive or local mock file
 app.get('/jobs', async (req, res) => {
+    const { search, filter } = req.query;
+    let jobs = [];
+
     try {
-        const response = await axios.get(REMOTIVE_API_URL);
-        const jobs = response.data.jobs;
-        res.json(jobs);
-    } catch (error) {
-        console.error('Error fetching jobs:', error);
-        res.status(500).json({ error: 'Failed to fetch jobs' });
+    // Check if local data should be used
+    if (process.env.USE_LOCAL_DATA === 'true') {
+        const response = await fs.readFile('mock_jobs.json', 'utf-8');
+        jobs = JSON.parse(response);
+    } else {
+        // Fetch jobs from Remotive API
+        const response = await axios.get(REMOTIVE_API_URL, {
+            params: { search }
+        });
+        jobs = response.data.jobs || [];
     }
+
+    // If no filter, return jobs immediately
+    if (!filter.trim()) {
+        return res.json(jobs);
+    }
+
+    // else ask for AI to filter each job
+    const filteredJobs = [];
+
+    for (const job of jobs){
+        const prompt = `You are a job search assistant. Given the following job description and user criteria, determine if the job should be included. Respond only with "INCLUDE" or "EXCLUDE".\n\nJob Description:\n${job.description}\n\nUser Criteria:\n${filter}`;
+
+        try {
+            const completion = await openai.chat.completions.create({
+                model: 'gpt-4.1-mini',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0,
+            });
+            // Get the answer from the LLM
+            // if the answer is not "INCLUDE" or "EXCLUDE", skip the job
+            const answer = (completion.choices[0].message.content || '').trim().toUpperCase();
+            if (answer.startsWith('INCLUDE')) {
+                filteredJobs.push(job);
+            }
+        } catch (llmErr) {
+            // If job skipped, log the error and continue
+            console.error(`LLM error for job ${job.id}:`, llmErr.message);
+        }
+    }
+
+    res.json(filteredJobs);
+} catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch jobs' });
+}
 });
 
 app.listen(PORT, () => {
