@@ -6,6 +6,8 @@ function App() {
 const [keyword, setKeyword] = useState('');
 const [jobs, setJobs] = useState([]);
 const [filter, setFilter] = useState('');
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
 
 
   return (
@@ -33,6 +35,22 @@ const [filter, setFilter] = useState('');
 
       <button type="submit">Search</button>
      </form>
+     {loading && <p>Loading...</p>}
+     {error && <p>Error: {error}</p>}
+
+     <h2>Results ({jobs.length})</h2>
+     {jobs.map(job => (
+      <div key={job.id} className="job-card">
+        <img src={job.company_logo} alt={job.company_name} />
+        <h3>{job.title}</h3>
+        <p>{job.company_name}</p>
+        <p>{job.location}</p>
+        <p>{job.salary}</p>
+        {/* accept html tags and truncate the description to 200 characters*/}
+        <div dangerouslySetInnerHTML={{ __html: job.description.substring(0, 200) + '...' }} />
+        <a href={job.url} target="_blank">View Posting</a>
+      </div>
+     ))}
     </>
   )
 }
