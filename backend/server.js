@@ -14,7 +14,6 @@ if (!process.env.OPENAI_API_KEY || !process.env.OPENAI_API_KEY.startsWith('sk-')
 }
 
 const PORT = process.env.PORT || 5000;
-const REMOTIVE_API_URL = 'https://remotive.com/api/remote-jobs';
 
 // Init OpenAI client
 const openai = new OpenAI({
@@ -45,8 +44,8 @@ app.get('/jobs', async (req, res) => {
         jobs = JSON.parse(response);
     } else {
         // Fetch jobs from Remotive API
-        const response = await axios.get(REMOTIVE_API_URL, {
-            params: { search }
+        const response = await axios.get(process.env.REMOTIVE_API_URL, {
+            params: { search, filter }
         });
         jobs = response.data.jobs || [];
     }
@@ -55,7 +54,6 @@ app.get('/jobs', async (req, res) => {
     if (!filter.trim()) {
         return res.json(jobs);
     }
-
     // else ask for AI to filter each job
     const filteredJobs = [];
 
@@ -63,14 +61,15 @@ app.get('/jobs', async (req, res) => {
         const prompt = `You are a job search assistant. Given the following job description and user criteria, determine if the job should be included. Respond only with "INCLUDE" or "EXCLUDE".\n\nJob Description:\n${job.description}\n\nUser Criteria:\n${filter}`;
 
         try {
-            const completion = await openai.chat.completions.create({
+            // Ask LLM to filter the job description
+            const response = await openai.responses.create({
                 model: 'gpt-4.1-mini',
-                messages: [{ role: 'user', content: prompt }],
+                input: prompt,
                 temperature: 0,
-            });
-            // Get the answer from the LLM
-            // if the answer is not "INCLUDE" or "EXCLUDE", skip the job
-            const answer = (completion.choices[0].message.content || '').trim().toUpperCase();
+              });
+              const answer = (response.output_text || '')
+                .trim()
+                .toUpperCase();
             if (answer.startsWith('INCLUDE')) {
                 filteredJobs.push(job);
             }

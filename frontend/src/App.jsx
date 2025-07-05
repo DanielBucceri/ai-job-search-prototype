@@ -9,6 +9,25 @@ const [filter, setFilter] = useState('');
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState(null);
 
+const handleSearch = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+  setJobs([]);
+
+  try {
+    const { data } = await axios.get(import.meta.env.VITE_BACKEND_URL + '/jobs', {
+      params: { search: keyword, filter: filter },
+    });
+    setJobs(data);
+  } catch (err) {
+    console.error(err);
+    setError('Failed to fetch jobs.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>
@@ -47,7 +66,7 @@ const [error, setError] = useState(null);
         <p>{job.location}</p>
         <p>{job.salary}</p>
         {/* accept html tags and truncate the description to 200 characters*/}
-        <div dangerouslySetInnerHTML={{ __html: job.description.substring(0, 200) + '...' }} />
+        <div dangerouslySetInnerHTML={{ __html: job.description.substring(0, 500) + '...' }} />
         <a href={job.url} target="_blank">View Posting</a>
       </div>
      ))}
