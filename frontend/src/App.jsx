@@ -11,6 +11,10 @@ const [error, setError] = useState(null);
 
 const handleSearch = async (e) => {
   e.preventDefault();
+  if (!keyword.trim()) {
+    setError('Please enter a search keyword.');
+    return;
+  }
   setLoading(true);
   setError(null);
   setJobs([]);
@@ -42,7 +46,8 @@ const handleSearch = async (e) => {
           id="search" 
           placeholder="e.g Senior Software Engineer" 
           onChange={(e) => setKeyword(e.target.value)} 
-          value={keyword}/>
+          value={keyword}
+          required />
       </label>
 
       <label htmlFor="filter">Filter Criteria (optional): 
@@ -54,8 +59,10 @@ const handleSearch = async (e) => {
           value={filter}
           />          
       </label>
-
-      <button type="submit">Search</button>
+      {/* prevent empty search and prevent multiple search clicks */}
+      <button type="submit" disabled={!keyword.trim() || loading}>
+        {loading ? 'Searching...' : 'Search'}
+      </button>
      </form>
      {loading && <p>Loading...</p>}
      {error && <p>Error: {error}</p>}

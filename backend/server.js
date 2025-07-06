@@ -40,13 +40,25 @@ app.get('/jobs', async (req, res) => {
     try {
     // Check if local data should be used
     if (process.env.USE_LOCAL_DATA === 'true') {
-        const response = await fs.readFile('mock_jobs.json', 'utf-8');
+        const response = await fs.readFile('data.json', 'utf-8');
         jobs = JSON.parse(response);
+        console.log("pulling from local data");
+
+        // Simple keyword local data filtering
+        if (search?.trim()) {
+            const searchLower = search.toLowerCase();
+            jobs = jobs.filter(job =>
+                job.title.toLowerCase().includes(searchLower) ||
+                job.company_name.toLowerCase().includes(searchLower) ||
+                job.description.toLowerCase().includes(searchLower)
+            );
+        }
     } else {
         // Fetch jobs from Remotive API
         const response = await axios.get(process.env.REMOTIVE_API_URL, {
             params: { search, filter }
         });
+        console.log("pulling from Remotive API");
         jobs = response.data.jobs || [];
     }
 
