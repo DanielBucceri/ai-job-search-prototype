@@ -44,10 +44,9 @@ const handleSearch = async (e) => {
         <input 
           type="text" 
           id="search" 
-          placeholder="e.g Senior Software Engineer" 
+          placeholder="e.g Systems Administrator" 
           onChange={(e) => setKeyword(e.target.value)} 
-          value={keyword}
-          required />
+          value={keyword} />
       </label>
 
       <label htmlFor="filter">Filter Criteria (optional): 
@@ -59,13 +58,13 @@ const handleSearch = async (e) => {
           value={filter}
           />          
       </label>
-      {/* prevent empty search and prevent multiple search clicks */}
-      <button type="submit" disabled={!keyword.trim() || loading}>
+      {/* prevent multiple search clicks while loading */}
+      <button type="submit" disabled={loading}>
         {loading ? 'Searching...' : 'Search'}
       </button>
      </form>
      {loading && <p>Loading...</p>}
-     {error && <p>Error: {error}</p>}
+     {error && <p className="error-message">{error}</p>}
 
      <h2>Results ({jobs.length})</h2>
      {jobs.map(job => (
