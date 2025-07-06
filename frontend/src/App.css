@@ -11,8 +11,25 @@ body {
   margin: 0;
   padding: 0 1rem;
 }
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
 h1 {
-  text-align: center;
+  margin: 0;
+  font-size: 2rem;
+  color: #333;
 }
 .container {
   max-width: 800px;

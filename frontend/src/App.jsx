@@ -31,7 +31,10 @@ const handleSearch = async (e) => {
 
   return (
     <>
-     <h1>AI Job Search</h1>
+      <header className="app-header">
+        <img src="/logo.svg" alt="Logo" className="logo" />
+        <h1>AI Job Search</h1>
+      </header>
      <form onSubmit={handleSearch}>
       <label htmlFor="search">Search keyword: 
         <input 
