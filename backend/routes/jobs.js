@@ -17,7 +17,7 @@ export default function jobsRouter(openai) {
 
     try {
     // Check if local data should be used
-      if (process.env.USE_LOCAL_DATA === 'true') {
+      if (process.env.USE_LOCAL_DATA == true) {
         const response = await fs.readFile('data.json', 'utf-8');
         jobs = JSON.parse(response);
         console.log('pulling from local data');

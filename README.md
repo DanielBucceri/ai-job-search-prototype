@@ -90,7 +90,7 @@ VITE_BACKEND_URL=http://localhost:5000
    PORT=5000
    FRONTEND_URL=http://localhost:5173
    OPENAI_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-   USE_LOCAL_DATA='true' # or !'true' string to hit Remotive API
+   USE_LOCAL_DATA=true # or false to hit Remotive API
    
    # frontend/.env
    VITE_BACKEND_URL=http://localhost:5000
